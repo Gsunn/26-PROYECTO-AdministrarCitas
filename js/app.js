@@ -12,61 +12,63 @@ const contenedorCitas = document.querySelector('#citas');
 // Formulario nuevas citas
 const formulario = document.querySelector('#nueva-cita')
 
-class Citas{
-    constructor(){
+let editando = false
+
+class Citas {
+    constructor() {
         this.citas = []
     }
 
-    agregarCita(cita){
-        this.citas =[...this.citas, cita]
+    agregarCita(cita) {
+        this.citas = [...this.citas, cita]
     }
 
-    eliminarCita(id){
-        this.citas = this.citas.filter( cita => cita.id !== id)
+    eliminarCita(id) {
+        this.citas = this.citas.filter(cita => cita.id !== id)
     }
 }
 
-class UI{
+class UI {
 
-    imprimirAlerta(mensaje, tipo){
+    imprimirAlerta(mensaje, tipo) {
         const divMensaje = document.createElement('div')
         divMensaje.classList.add('text-center', 'alert', 'd-block', 'col-12')
 
         // Agregar class
-        switch(tipo){
+        switch (tipo) {
             case 'error':
-                        divMensaje.classList.add('alert-danger')
-                        break
+                divMensaje.classList.add('alert-danger')
+                break
             case 'success':
-                        divMensaje.classList.add('alert-success')
-                        break
+                divMensaje.classList.add('alert-success')
+                break
             case 'warning':
-                        divMensaje.classList.add('alert-warning')
-                        break
+                divMensaje.classList.add('alert-warning')
+                break
 
         }
 
         divMensaje.textContent = mensaje
 
         //agregar al dom el mensaje
-        document.querySelector('#contenido').insertBefore(divMensaje,  document.querySelector('.agregar-cita'))
+        document.querySelector('#contenido').insertBefore(divMensaje, document.querySelector('.agregar-cita'))
 
-        setTimeout(()=> {
+        setTimeout(() => {
             divMensaje.remove()
         }, 3000)
     }
 
-    imprimirCitas({citas}){
+    imprimirCitas({ citas }) {
 
         this.limpiarHTML()
 
-        citas.forEach( cita => {
-            const {mascota, propietario, telefono, fecha, hora, sintomas, id} = cita
+        citas.forEach(cita => {
+            const { mascota, propietario, telefono, fecha, hora, sintomas, id } = cita
 
             const divCita = document.createElement('div')
             divCita.classList.add('cita', 'p-3')
             divCita.dataset.id = id
-            
+
             //Scripting
             const mascotaParrafo = document.createElement('h2')
             mascotaParrafo.classList.add('card-title', 'font-weight-bolder')
@@ -77,7 +79,7 @@ class UI{
 
             const telefonoParrafo = document.createElement('p')
             telefonoParrafo.innerHTML = `<span class="font-weight-bolder">Tlf: </span> ${telefono}`
-            
+
             const fechaParrafo = document.createElement('p')
             fechaParrafo.innerHTML = `<span class="font-weight-bolder">Fecha: </span> ${fecha}`
 
@@ -87,14 +89,18 @@ class UI{
             const sintomasParrafo = document.createElement('p')
             sintomasParrafo.innerHTML = `<span class="font-weight-bolder">Sintomas: </span> ${sintomas}`
 
-              // Agregar un botón de eliminar...
-              const btnEliminar = document.createElement('button');
-              btnEliminar.onclick = () => eliminarCita(id); // añade la opción de eliminar
-              btnEliminar.classList.add('btn', 'btn-danger', 'mr-2');
-              btnEliminar.innerHTML = 'Eliminar <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
-  
+            // Agregar un botón de eliminar...
+            const btnEliminar = document.createElement('button');
+            btnEliminar.onclick = () => eliminarCita(id); // añade la opción de eliminar
+            btnEliminar.classList.add('btn', 'btn-danger', 'mr-2');
+            btnEliminar.innerHTML = 'Eliminar <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
 
-            
+            // Añade un botón de editar...
+            const btnEditar = document.createElement('button');
+            btnEditar.classList.add('btn', 'btn-info');
+            btnEditar.innerHTML = 'Editar <svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>'
+            btnEditar.onclick = () => cargarEdicion(cita);
+
             // Agregar parrados
             divCita.appendChild(mascotaParrafo)
             divCita.appendChild(propietarioParrafo)
@@ -103,7 +109,7 @@ class UI{
             divCita.appendChild(horaParrafo)
             divCita.appendChild(sintomasParrafo)
             divCita.appendChild(btnEliminar)
-
+            divCita.appendChild(btnEditar)
 
             // Agregar al DOM
             contenedorCitas.appendChild(divCita)
@@ -111,10 +117,10 @@ class UI{
     }
 
     limpiarHTML() {
-        while(contenedorCitas.firstChild) {
+        while (contenedorCitas.firstChild) {
             contenedorCitas.removeChild(contenedorCitas.firstChild);
         }
-   }
+    }
 }
 
 const ui = new UI()
@@ -123,12 +129,12 @@ const administrarCitas = new Citas()
 // Eventos
 eventListeners();
 function eventListeners() {
-    mascotaInput.addEventListener('change', datosCita);
-    propietarioInput.addEventListener('change', datosCita);
-    telefonoInput.addEventListener('change', datosCita);
-    fechaInput.addEventListener('change', datosCita);
-    horaInput.addEventListener('change', datosCita);
-    sintomasInput.addEventListener('change', datosCita);
+    mascotaInput.addEventListener('change', datosCita)
+    propietarioInput.addEventListener('change', datosCita)
+    telefonoInput.addEventListener('change', datosCita)
+    fechaInput.addEventListener('change', datosCita)
+    horaInput.addEventListener('change', datosCita)
+    sintomasInput.addEventListener('change', datosCita)
 
     formulario.addEventListener('submit', nuevaCita)
 }
@@ -138,37 +144,51 @@ const citaObj = {
     propietario: '',
     telefono: '',
     fecha: '',
-    hora:'',
+    hora: '',
     sintomas: ''
 }
 
 
 function datosCita(e) {
     //  console.log(e.target.name) // Obtener el Input
-     citaObj[e.target.name] = e.target.value;
+    citaObj[e.target.name] = e.target.value
 }
 
 
 // Valida y agraga nueva cita
-function nuevaCita(e){
+function nuevaCita(e) {
     e.preventDefault()
 
     // Extraer info de cita
-    const {mascota, propietario, telefono, fecha, hora, sintomas} = citaObj
+    const { mascota, propietario, telefono, fecha, hora, sintomas } = citaObj
 
     // Validar 
     // Validar
-    if( mascota === '' || propietario === '' || telefono === '' || fecha === ''  || hora === '' || sintomas === '' ) {
+    if (mascota === '' || propietario === '' || telefono === '' || fecha === '' || hora === '' || sintomas === '') {
         ui.imprimirAlerta('Todos los campos son Obligatorios.', 'error')
 
         return;
     }
 
-    // generar ID
-    citaObj.id = Date.now()
+    if (editando) {
+        ui.imprimirAlerta('Editado correctamente..', 'success')
 
-    // Crear cita
-    administrarCitas.agregarCita({...citaObj})
+        // Actulizar cita
+        
+
+        // Resetear controles
+        formulario.querySelector('button[type="submit"]').textContent = 'Crear cita'
+
+        // Modo edicion OFF
+        editando = false
+    } else {
+        // generar ID
+        citaObj.id = Date.now()
+
+        // Crear cita
+        administrarCitas.agregarCita({ ...citaObj })
+        ui.imprimirAlerta('Nueva cita creada.', 'success')
+    }
 
     // Resets
     reiniciarObjeto()
@@ -188,11 +208,40 @@ function reiniciarObjeto() {
     citaObj.sintomas = ''
 }
 
-function eliminarCita(id){
+function eliminarCita(id) {
     // eliminar cita
     administrarCitas.eliminarCita(id)
     // mostrar cita
     ui.imprimirAlerta('La cita se elimino correctamente.', 'success')
     //mostrar citas
     ui.imprimirCitas(administrarCitas)
+}
+
+
+// Modo edicion
+function cargarEdicion(cita) {
+    const { mascota, propietario, telefono, fecha, hora, sintomas } = cita
+
+    // llenar los input del formulario
+    mascotaInput.value = mascota
+    propietarioInput = propietario
+    telefonoInput = telefono
+    fechaInput = fecha
+    horaInput = hora
+    sintomasInput = sintomas
+
+    // carga valores en el objeto cita
+    citaObj.mascota = mascota;
+    citaObj.propietario = propietario;
+    citaObj.telefono = telefono;
+    citaObj.fecha = fecha
+    citaObj.hora = hora;
+    citaObj.sintomas = sintomas;
+    citaObj.id = id;
+
+    //Cambiar text boton crear
+
+    formulario.querySelector('button[type="submit"]').textContent = 'Guardar Cambios'
+
+    editando = true
 }
