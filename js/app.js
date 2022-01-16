@@ -16,6 +16,11 @@ class Citas{
     constructor(){
         this.citas = []
     }
+
+    agregarCita(cita){
+        this.citas =[...this.citas, cita]
+        console.log(this.citas)
+    }
 }
 
 class UI{
@@ -95,5 +100,26 @@ function nuevaCita(e){
         return;
     }
 
-    
+    // generar ID
+    citaObj.id = Date.now()
+
+    // Crear cita
+    administrarCitas.agregarCita({...citaObj})
+
+    // Resets
+    reiniciarObjeto()
+    formulario.reset()
+
+    // Mostrar citas en el DOM
+
+}
+
+function reiniciarObjeto() {
+    // Reiniciar el objeto
+    citaObj.mascota = ''
+    citaObj.propietario = ''
+    citaObj.telefono = ''
+    citaObj.fecha = ''
+    citaObj.hora = ''
+    citaObj.sintomas = ''
 }
