@@ -1,5 +1,6 @@
-import { eliminarCita, cargarEdicion } from '../funciones.js'
+// import { eliminarCita, cargarEdicion } from '../funciones.js'
 import { contenedorCitas, heading } from '../selectores.js'
+import { cargarEdicion, eliminarCita } from '../funciones.js'
 
 class UI {
 
@@ -35,14 +36,28 @@ class UI {
         }, 3000)
     }
 
-    imprimirCitas({ citas }) {
-
+    imprimirCitas(dataBase) {
         this.limpiarHTML()
 
+        // Leer contenido de la BBDD
+        const objStore = dataBase.transaction('citas').objectStore('citas')
 
-        citas.forEach(cita => {
+        objStore.openCursor().onsuccess = (e) => {
+           // console.log(e.target.result);
 
-            const { mascota, propietario, telefono, fecha, hora, sintomas, id } = cita
+           const cursor = e.target.result
+
+           const totalCitas = objStore.count()
+
+           const fnTxtHeading = this.textoHeading
+
+           totalCitas.onsuccess = function (){
+                fnTxtHeading(totalCitas.result)
+           }
+         
+
+           if(cursor){
+            const { mascota, propietario, telefono, fecha, hora, sintomas, id } = cursor.value
 
             const divCita = document.createElement('div')
             divCita.classList.add('cita', 'p-3')
@@ -78,6 +93,8 @@ class UI {
             const btnEditar = document.createElement('button');
             btnEditar.classList.add('btn', 'btn-info');
             btnEditar.innerHTML = 'Editar <svg fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>'
+            
+            const cita = cursor.value
             btnEditar.onclick = () => cargarEdicion(cita);
 
             // Agregar parrados
@@ -92,9 +109,12 @@ class UI {
 
             // Agregar al DOM
             contenedorCitas.appendChild(divCita)
-        })
 
-        this.textoHeading(citas)
+            // Cursor avanza al siguiente elemento
+            cursor.continue()
+           }
+
+        }
 
     }
 
@@ -104,9 +124,8 @@ class UI {
         }
     }
 
-    textoHeading(citas){
-        console.log(citas);
-        if(citas.length > 0){
+    textoHeading(resultado){       
+        if(resultado > 0){
             heading.textContent = 'Administra tus Citas.'
         }else{
             heading.textContent = 'No tienes citas.'

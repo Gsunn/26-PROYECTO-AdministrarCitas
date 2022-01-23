@@ -1,3 +1,5 @@
+import { crearDB } from './Db.js'
+
 import {datosCita, nuevaCita} from '../funciones.js'
 import { mascotaInput, propietarioInput,
     telefonoInput, fechaInput,
@@ -17,6 +19,9 @@ class App{
         sintomasInput.addEventListener('change', datosCita)
     
         formulario.addEventListener('submit', nuevaCita)
+
+        crearDB()
+
     }
 }
 
